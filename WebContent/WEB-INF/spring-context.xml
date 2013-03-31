@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+						http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+						http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+	<context:component-scan base-package="net.studyprojects.calcdespesas" />
+
+	<mvc:annotation-driven />
+
+	<!-- Spring MVC - Controle de Transação via anotação pelo Spring MVC -->
+
+	<tx:annotation-driven />
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- Spring MVC - recursos que não devem passar pela Servlet -->
+
+	<mvc:default-servlet-handler />
+
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Sping MVC - Mensagens Customizadas -->
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/i18n/message" />
+	</bean>
+
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+	</bean>
+
+	<!-- Spring MVC - Interceptando as requisições -->
+	<!-- <mvc:interceptors> <bean class="br.com.caelum.tarefas.interceptor.AutorizadorInterceptor"> 
+		</bean> </mvc:interceptors> -->
+	<mvc:view-controller path="/" view-name="loginForm" />
+
+	<!-- Spring MVC - IoC / DI - DataSource - Padrão Java EE -->
+	<!-- 
+	<bean id="mysqlDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost/devcalcdespesas" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+	</bean>
+ 	-->
+	
+	<bean id="c3p0DataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		 <!-- Connection properties -->
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql://localhost/devcalcdespesas" />
+		<property name="user" value="root" />
+		<property name="password" value="root" />
+
+		<!-- Pool properties -->
+		<property name="minPoolSize" value="5" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxStatements" value="50" />
+		<property name="idleConnectionTestPeriod" value="3000" />
+		<property name="loginTimeout" value="300" />
+	</bean>
+
+	<!-- Configurando o JPA no Spring -->
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="c3p0DataSource"></property>
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+	</bean>
+
+	<!-- Configurando o gerenciamento de transação pelo Spring MVC -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+</beans>
